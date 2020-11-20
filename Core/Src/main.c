@@ -43,6 +43,7 @@
 UART_HandleTypeDef hlpuart1;
 
 osThreadId defaultTaskHandle;
+osThreadId ledTaskHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -52,6 +53,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_LPUART1_UART_Init(void);
 void StartDefaultTask(void const * argument);
+void StartLEDTask(void const * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -113,8 +115,11 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityLow, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  osThreadDef(ledTask, StartLEDTask, osPriorityBelowNormal, 0, 128);
+  ledTaskHandle = osThreadCreate(osThread(ledTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -269,6 +274,15 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void StartLEDTask(void const * argument)
+{
+  /* Infinite loop */
+	for(;;)
+	{
+		osDelay(20);
+		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	}
+}
 
 /* USER CODE END 4 */
 
@@ -285,8 +299,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
 	for(;;)
 	{
-		osDelay(500);
-		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		osDelay(1);
 	}
   /* USER CODE END 5 */
 }
